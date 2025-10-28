@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Voice Assistant</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928DAB);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #ff4081;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #f50057;
+    }
+
+    input {
+      padding: 12px 20px;
+      width: 80%;
+      max-width: 400px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .status {
+      margin-top: 30px;
+      font-size: 1.1rem;
+      color: #ffeaea;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎙️ AI Voice Assistant</h1>
+  <p>Say or type commands like “Play sad gaana on YouTube” or “Tell me the time”</p>
+
+  <button id="start-btn">Start Listening</button>
+
+  <input type="text" id="command-input" placeholder="Type a command and press Enter...">
+
+  <div class="status" id="status">Ready to assist...</div>
+
+  <script>
+    const startBtn = document.getElementById('start-btn');
+    const status = document.getElementById('status');
+    const commandInput = document.getElementById('command-input');
+
+    // Speech recognition setup
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+
+    // Speech synthesis function
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-IN';
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Function to process both voice and typed commands
+    function processCommand(command) {
+      command = command.toLowerCase();
+      status.innerHTML = `You said: <b>${command}</b>`;
+      console.log("User command:", command);
+
+      // 🎵 YouTube Music Search
+      if (command.includes("play") && command.includes("youtube")) {
+        const query = command.replace("play", "").replace("on youtube", "").trim();
+        const searchQuery = query ? query : "music";
+        speak(`Playing ${searchQuery} on YouTube`);
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, "_blank");
+
+      } else if (command.includes("open youtube")) {
+        speak("Opening YouTube");
+        window.open("https://www.youtube.com", "_blank");
+
+      } else if (command.includes("open google")) {
+        speak("Opening Google");
+        window.open("https://www.google.com", "_blank");
+
+      } else if (command.includes("time")) {
+        const time = new Date().toLocaleTimeString();
+        speak("The current time is " + time);
+
+      } else if (command.includes("date")) {
+        const date = new Date().toLocaleDateString();
+        speak("Today's date is " + date);
+
+      } else if (command.includes("hello")) {
+        speak("Hello there! How are you?");
+
+      } else if (command.includes("thank you")) {
+        speak("You're welcome!");
+
+      } else if (command.includes("stop") || command.includes("exit") || command.includes("quit")) {
+        speak("Goodbye! Have a nice day.");
+        recognition.stop();
+
+      } else if (command.trim() !== "") {
+        speak("Sorry, I didn't understand that. Please try again.");
+      }
+    }
+
+    // 🎙️ Voice listening trigger
+    startBtn.addEventListener('click', () => {
+      recognition.start();
+      speak("Hello! I am listening now...");
+      status.innerText = "Listening...";
+    });
+
+    // When speech recognized
+    recognition.onresult = (event) => {
+      const command = event.results[0][0].transcript;
+      processCommand(command);
+    };
+
+    recognition.onerror = (event) => {
+      speak("Sorry, I couldn't hear you properly. Please try again.");
+      status.innerText = "Error: Try again!";
+    };
+
+    recognition.onend = () => {
+      status.innerText = "Click the button to speak again...";
+    };
+
+    // ⌨️ Handle typed commands
+    commandInput.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        const typedCommand = commandInput.value.trim();
+        if (typedCommand) {
+          processCommand(typedCommand);
+          commandInput.value = "";
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
